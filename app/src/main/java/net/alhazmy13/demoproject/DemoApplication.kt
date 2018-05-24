@@ -17,7 +17,6 @@ class DemoApplication:Application() {
 
     private fun buildApplicationComponent(){
         applicationComponent = DaggerApplicationComponent.builder()
-                .networkModule(NetworkModule())
                 .build()
     }
 

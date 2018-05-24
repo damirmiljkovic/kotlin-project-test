@@ -1,20 +1,24 @@
 package net.alhazmy13.demoproject.ui.main
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.provider.SyncStateContract.Helpers.update
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import net.alhazmy13.demoproject.R
-import net.alhazmy13.demoproject.app
 import net.alhazmy13.demoproject.model.PostModel
+import net.alhazmy13.demoproject.util.app
+import net.alhazmy13.demoproject.viewmodel.ViewModelFactory
 import javax.inject.Inject
 
 
 class MainActivity : AppCompatActivity(), PostInterface {
 
     @Inject
-    lateinit var mainPresenter: MainPresenter
+    lateinit var viewModelFactory: ViewModelFactory
 
     private lateinit var postsAdapter: PostsAdapter
     private val posts = arrayListOf<PostModel>()
@@ -24,7 +28,10 @@ class MainActivity : AppCompatActivity(), PostInterface {
         app.applicationComponent.inject(this)
         setContentView(R.layout.activity_main)
         setupRecyclerView()
-        mainPresenter.getAllPosts(this)
+
+        val viewModel = ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
+        viewModel.getPosts().observe(this, Observer(::updatePosts))
+
     }
 
     private fun setupRecyclerView() {
@@ -41,6 +48,18 @@ class MainActivity : AppCompatActivity(), PostInterface {
     override fun onError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
+
+    private fun updatePosts(posts: List<PostModel>?) {
+        posts?.let {
+            this.posts.addAll(it)
+            postsAdapter.notifyDataSetChanged()
+        }
+
+    }
+
+//    private fun updatePosts(posts:List<PostModel>){
+//
+//    }
 
     //    private var listView: ListView? = null
 //    private var adapter: SimpleArrayAdapter? = null
@@ -97,3 +116,5 @@ class MainActivity : AppCompatActivity(), PostInterface {
 //        }
 //    }
 }
+
+
